@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Health Coach</title>
+    <!-- Tailwind CSS CDN para estilização moderna e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter para toda a página */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e5e7eb; /* Fundo cinza suave */
+        }
+        /* Estilo para a tela de splash */
+        .splash-screen {
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.9)), url('https://placehold.co/800x600/0f172a/ffffff?text=MOVE');
+            background-size: cover;
+            background-position: center;
+        }
+        /* Efeito de hover nos cards */
+        .module-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        /* Estilo para as mensagens de alerta com cores diferentes */
+        .alert-success { background-color: #d1fae5; border-color: #34d399; color: #065f46; }
+        .alert-warning { background-color: #fffbeb; border-color: #f59e0b; color: #92400e; }
+        .alert-error { background-color: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Tela de Início (Splash Screen) -->
+    <div id="splashScreen" class="splash-screen absolute inset-0 flex flex-col items-center justify-center text-white p-4 text-center z-50">
+        <h1 class="text-5xl font-extrabold mb-4 animate-pulse">Sua Jornada Começa Agora</h1>
+        <p class="text-xl font-semibold mb-8 max-w-sm">Mantenha o foco, seja disciplinado. Seu corpo agradece.</p>
+        <button id="accessAppButton" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105 mb-4">
+            Iniciar
+        </button>
+    </div>
+
+    <!-- Conteúdo Principal do Aplicativo (Inicialmente oculto) -->
+    <div id="mainApp" class="hidden bg-white p-6 rounded-3xl shadow-2xl max-w-lg w-full mx-auto">
+        
+        <!-- Título do Aplicativo -->
+        <h1 class="text-3xl font-extrabold text-center mb-6 text-gray-800 tracking-wide">Seu Health Coach Pessoal</h1>
+
+        <!-- Seção de Mensagens e Alertas (Visível em todos os módulos) -->
+        <div id="messages" class="border-l-4 p-4 rounded-lg shadow-inner hidden mb-6">
+            <p id="messageText"></p>
+        </div>
+
+        <!-- Módulo: Menu Principal -->
+        <div id="mainMenu" class="space-y-4">
+            <button id="goToMetrics" class="w-full bg-blue-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition duration-300 module-card">
+                <span class="text-xl">Métricas Diárias</span>
+                <p class="text-sm opacity-80">Rastreie sua atividade, saúde e bem-estar.</p>
+            </button>
+            <button id="goToPlan" class="w-full bg-green-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition duration-300 module-card">
+                <span class="text-xl">Seu Plano e Progresso</span>
+                <p class="text-sm opacity-80">Defina metas e analise sua evolução corporal.</p>
+            </button>
+            <button id="goToHistory" class="w-full bg-purple-500 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition duration-300 module-card">
+                <span class="text-xl">Seu Histórico Semanal</span>
+                <p class="text-sm opacity-80">Veja seu desempenho ao longo da semana.</p>
+            </button>
+        </div>
+
+        <!-- Módulo: Métricas Diárias (Inicialmente oculto) -->
+        <div id="metricsModule" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Métricas Diárias</h2>
+
+            <!-- Botões de Controle do Rastreador -->
+            <div class="flex justify-center items-center space-x-4 mb-6">
+                <button id="startButton" class="bg-indigo-600 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105">
+                    Começar
+                </button>
+                <button id="stopButton" class="bg-red-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-red-600 transition duration-300 transform hover:scale-105 hidden">
+                    Parar
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Card de Passos e Distância -->
+                <div class="bg-gradient-to-br from-indigo-600 to-blue-500 text-white p-6 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-8 h-8 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h-1v6h-2m2 0h-2m-2-2v4m4-4h-2m2-2v4m2-4v4m-2-4v2m-2-2h-2m2-2v4m-2-2h-2m-2-2v4m2-2h-2m-2-2v4m-2-2h-2m2-2v2m-2-2h-2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM8 14a4 4 0 100-8 4 4 0 000 8z"></path></svg>
+                        <h2 class="text-xl font-semibold">Atividade</h2>
+                    </div>
+                    <p class="text-5xl font-extrabold mb-1 tracking-tight"><span id="steps">0</span></p>
+                    <p class="text-sm opacity-90">Passos</p>
+                    <div class="mt-4 border-t border-indigo-400 pt-4">
+                        <p class="text-2xl font-bold"><span id="distance">0.00</span> <span class="text-sm">km</span></p>
+                        <p class="text-sm opacity-90">Distância</p>
+                    </div>
+                </div>
+
+                <!-- Card de Tempo de Corrida -->
+                <div class="bg-gradient-to-br from-purple-600 to-pink-500 text-white p-6 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-8 h-8 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <h2 class="text-xl font-semibold">Tempo de Corrida</h2>
+                    </div>
+                    <p class="text-5xl font-extrabold mb-1 tracking-tight"><span id="runningTime">00:00:00</span></p>
+                    <p class="text-sm opacity-90">Horas:Minutos:Segundos</p>
+                </div>
+
+                <!-- Card de Calorias e Batimentos Cardíacos -->
+                <div class="bg-gradient-to-br from-emerald-500 to-green-400 text-white p-6 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-8 h-8 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                        <h2 class="text-xl font-semibold">Saúde</h2>
+                    </div>
+                    <p class="text-5xl font-extrabold mb-1 tracking-tight"><span id="calories">0</span></p>
+                    <p class="text-sm opacity-90">Calorias Queimadas</p>
+                    <div class="mt-4 border-t border-emerald-400 pt-4">
+                        <p class="text-2xl font-bold"><span id="heartRate">--</span> <span class="text-sm">bpm</span></p>
+                        <p class="text-sm opacity-90">Batimentos Cardíacos</p>
+                    </div>
+                </div>
+
+                <!-- Card de Hidratação e Exposição ao Sol -->
+                <div class="bg-gradient-to-br from-orange-500 to-amber-400 text-white p-6 rounded-2xl shadow-xl transform transition duration-300 hover:scale-105">
+                    <div class="flex items-center mb-2">
+                        <svg class="w-8 h-8 text-white mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22s8-4 8-10V5L12 2 4 5v7c0 6 8 10 8 10zM12 11V5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11V5"></path></svg>
+                        <h2 class="text-xl font-semibold">Bem-Estar</h2>
+                    </div>
+                    <p class="text-5xl font-extrabold mb-1 tracking-tight"><span id="hydration">0</span></p>
+                    <p class="text-sm opacity-90">Copos de Água</p>
+                    <button id="drinkButton" class="mt-4 text-white bg-orange-600 px-4 py-2 rounded-full text-sm font-semibold hover:bg-orange-700 transition duration-300">Beber Água</button>
+                    <div class="mt-4 border-t border-amber-300 pt-4">
+                        <p class="text-2xl font-bold"><span id="uvIndex">--</span></p>
+                        <p class="text-sm opacity-90">Índice UV</p>
+                    </div>
+                </div>
+            </div>
+
+            <button id="backFromMetrics" class="mt-8 w-full bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-400 transition duration-300">
+                Voltar ao Menu Principal
+            </button>
+        </div>
+
+        <!-- Módulo: Seu Plano e Progresso (Inicialmente oculto) -->
+        <div id="planModule" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Seu Plano e Progresso</h2>
+
+            <!-- Seção de Metas e Conquistas (Gamificação) -->
+            <div class="bg-gray-50 p-6 rounded-2xl shadow-inner mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Suas Metas e Conquistas</h3>
+                <ul id="goalsList" class="list-none space-y-2">
+                    <li class="flex items-center text-lg">
+                        <input type="checkbox" id="goal-water" class="form-checkbox h-5 w-5 text-indigo-600 rounded-full cursor-pointer transition duration-150 ease-in-out">
+                        <label for="goal-water" class="ml-2 text-gray-700">Beber 8 copos de água</label>
+                    </li>
+                    <li class="flex items-center text-lg">
+                        <input type="checkbox" id="goal-steps" class="form-checkbox h-5 w-5 text-indigo-600 rounded-full cursor-pointer transition duration-150 ease-in-out">
+                        <label for="goal-steps" class="ml-2 text-gray-700">Completar 5.000 passos</label>
+                    </li>
+                    <li class="flex items-center text-lg">
+                        <input type="checkbox" id="goal-run" class="form-5 w-5 text-indigo-600 rounded-full cursor-pointer transition duration-150 ease-in-out">
+                        <label for="goal-run" class="ml-2 text-gray-700">Correr por 30 minutos</label>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Seção de Análise de Imagem -->
+            <div class="bg-gray-50 p-6 rounded-2xl shadow-inner">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Análise Corporal</h3>
+                <p class="text-gray-600 mb-4">Envie uma foto sua para que a IA analise a sua evolução corporal.</p>
+                <div class="flex flex-col items-center space-y-4">
+                    <input type="file" id="imageInput" accept="image/*" class="w-full text-gray-700 bg-white border border-gray-300 rounded-lg cursor-pointer">
+                    <button id="analyzeButton" class="w-full bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-700 transition duration-300 transform hover:scale-105">
+                        Analisar Foto
+                    </button>
+                    <div id="imagePreview" class="mt-4 hidden">
+                        <img id="uploadedImage" class="max-h-64 rounded-xl shadow-lg" src="" alt="Imagem enviada para análise">
+                    </div>
+                    <div id="analysisResults" class="mt-4 text-center p-4 bg-white rounded-lg shadow-inner w-full hidden">
+                        <p id="analysisLoading" class="text-indigo-600 font-semibold hidden">Analisando sua foto...</p>
+                        <div id="analysisContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <button id="backFromPlan" class="mt-8 w-full bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-400 transition duration-300">
+                Voltar ao Menu Principal
+            </button>
+        </div>
+
+        <!-- Módulo: Histórico Semanal (Inicialmente oculto) -->
+        <div id="historyModule" class="hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Seu Histórico Semanal</h2>
+            <div class="bg-gray-50 p-6 rounded-2xl shadow-inner">
+                <div id="weeklyHistory" class="grid grid-cols-1 gap-4">
+                    <!-- O histórico semanal será renderizado aqui pelo JavaScript -->
+                </div>
+            </div>
+
+            <button id="backFromHistory" class="mt-8 w-full bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full shadow-md hover:bg-gray-400 transition duration-300">
+                Voltar ao Menu Principal
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Script JavaScript -->
+    <script>
+        // Use a função `window.onload` para garantir que o script seja executado após o carregamento total da página.
+        window.onload = function() {
+            // =======================================================================================
+            // 1. Variáveis e Estado do Aplicativo
+            // =======================================================================================
+            const state = {
+                steps: 0,
+                distance: 0, // em km
+                calories: 0,
+                hydration: 0, // em copos
+                heartRate: 0, // em bpm
+                uvIndex: 0,
+                runningTimeInSeconds: 0, // Novo estado para o tempo de corrida
+                isTracking: false,
+                isPaused: false,
+                lastPosition: null,
+                lastHydrationAlert: null,
+                goals: {
+                    water: false,
+                    steps: false,
+                    run: false,
+                },
+                weeklyHistory: [],
+                currentDay: new Date().toLocaleDateString('pt-BR'),
+                geolocationWatchId: null // ID para o rastreador de geolocalização
+            };
+
+            // Referências aos elementos HTML
+            const splashScreen = document.getElementById('splashScreen');
+            const mainApp = document.getElementById('mainApp');
+            const accessAppButton = document.getElementById('accessAppButton');
+
+            // Módulos principais
+            const mainMenu = document.getElementById('mainMenu');
+            const metricsModule = document.getElementById('metricsModule');
+            const planModule = document.getElementById('planModule');
+            const historyModule = document.getElementById('historyModule');
+
+            // Elementos de métricas
+            const stepsEl = document.getElementById('steps');
+            const distanceEl = document.getElementById('distance');
+            const caloriesEl = document.getElementById('calories');
+            const hydrationEl = document.getElementById('hydration');
+            const heartRateEl = document.getElementById('heartRate');
+            const uvIndexEl = document.getElementById('uvIndex');
+            const runningTimeEl = document.getElementById('runningTime'); // Novo elemento
+
+            // Botões de controle de rastreamento
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+            const drinkButton = document.getElementById('drinkButton');
+
+            // Seções de feedback
+            const messagesEl = document.getElementById('messages');
+            const messageTextEl = document.getElementById('messageText');
+            
+            // Seção de histórico
+            const weeklyHistoryEl = document.getElementById('weeklyHistory');
+            
+            // Seção de metas e análise
+            const goalsListEl = document.getElementById('goalsList');
+            const imageInput = document.getElementById('imageInput');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const analysisResults = document.getElementById('analysisResults');
+            const analysisLoading = document.getElementById('analysisLoading');
+            const analysisContent = document.getElementById('analysisContent');
+            
+            let heartRateInterval = null;
+            let hydrationAlertInterval = null;
+            let uvCheckInterval = null;
+            let runningTimeInterval = null; // Novo intervalo para o tempo de corrida
+
+            // =======================================================================================
+            // 2. Funções de Simulação e Lógica
+            // =======================================================================================
+
+            /**
+             * Calcula a distância entre duas coordenadas de GPS usando a fórmula de Haversine.
+             * @param {number} lat1 - Latitude do primeiro ponto.
+             * @param {number} lon1 - Longitude do primeiro ponto.
+             * @param {number} lat2 - Latitude do segundo ponto.
+             * @param {number} lon2 - Longitude do segundo ponto.
+             * @returns {number} A distância em metros.
+             */
+            function haversineDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3; // Raio da Terra em metros
+                const phi1 = lat1 * Math.PI / 180;
+                const phi2 = lat2 * Math.PI / 180;
+                const deltaPhi = (lat2 - lat1) * Math.PI / 180;
+                const deltaLambda = (lon2 - lon1) * Math.PI / 180;
+
+                const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+                          Math.cos(phi1) * Math.cos(phi2) *
+                          Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return R * c; // Distância em metros
+            }
+            
+            /**
+             * Exibe uma mensagem de alerta na tela, com estilo baseado no tipo.
+             * @param {string} text - O texto da mensagem.
+             * @param {string} type - O tipo de alerta: 'success', 'warning', 'error'.
+             */
+            function showAlert(text, type = 'warning') {
+                messagesEl.classList.remove('hidden', 'alert-success', 'alert-warning', 'alert-error');
+                messagesEl.classList.add(`alert-${type}`);
+                messageTextEl.textContent = text;
+                // Oculta a mensagem após 5 segundos
+                setTimeout(() => {
+                    messagesEl.classList.add('hidden');
+                }, 5000);
+            }
+
+            /**
+             * Rastreia o movimento do usuário usando a API de Geolocation.
+             */
+            function startGeolocationTracking() {
+                if (navigator.geolocation) {
+                    // Opções para watchPosition
+                    const options = {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 5000,
+                    };
+                    
+                    state.geolocationWatchId = navigator.geolocation.watchPosition(
+                        (position) => {
+                            const newPosition = position.coords;
+                            if (state.lastPosition) {
+                                const distanceInMeters = haversineDistance(
+                                    state.lastPosition.latitude,
+                                    state.lastPosition.longitude,
+                                    newPosition.latitude,
+                                    newPosition.longitude
+                                );
+
+                                // Converte metros para passos (aproximadamente 0.76m por passo)
+                                const stepsPerMeter = 1 / 0.76;
+                                const newSteps = Math.round(distanceInMeters * stepsPerMeter);
+                                
+                                // Adiciona a distância e os passos ao estado
+                                state.distance += distanceInMeters / 1000; // Converte para km
+                                state.steps += newSteps;
+
+                                // Adiciona calorias queimadas (aproximadamente 50 calorias por km)
+                                const caloriesPerKm = 50;
+                                state.calories += (distanceInMeters / 1000) * caloriesPerKm;
+
+                                updateUI();
+                                updateWeeklyHistory();
+                            }
+                            state.lastPosition = newPosition;
+                        },
+                        (error) => {
+                            console.error('Erro de Geolocation:', error);
+                            // Tratamento de erros melhorado
+                            let errorMessage = '';
+                            if (error.code === error.PERMISSION_DENIED) {
+                                errorMessage = "Permissão de localização negada. Ative nas configurações do seu celular para usar o rastreamento.";
+                            } else if (error.code === error.POSITION_UNAVAILABLE) {
+                                errorMessage = "Sua localização não está disponível. Verifique o sinal de GPS ou as configurações do seu celular.";
+                            } else {
+                                errorMessage = `Ocorreu um erro desconhecido no rastreamento de localização. Código: ${error.code}`;
+                            }
+                            showAlert(errorMessage, 'error');
+                            stopGeolocationTracking();
+                            resetApp();
+                        },
+                        options
+                    );
+                    
+                    showAlert("Rastreamento de movimento iniciado!", 'success');
+
+                } else {
+                    showAlert("A API de Geolocation não é suportada por este navegador.", 'error');
+                }
+            }
+
+            /**
+             * Para o rastreamento de movimento baseado em Geolocation.
+             */
+            function stopGeolocationTracking() {
+                if (state.geolocationWatchId) {
+                    navigator.geolocation.clearWatch(state.geolocationWatchId);
+                    state.geolocationWatchId = null;
+                    state.lastPosition = null;
+                }
+            }
+            
+            /**
+             * Formata segundos para o formato HH:MM:SS.
+             * @param {number} seconds - O número de segundos.
+             * @returns {string} O tempo formatado.
+             */
+            function formatTime(seconds) {
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = (seconds % 60).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
+
+            /**
+             * Atualiza a interface com os valores do estado atual.
+             */
+            function updateUI() {
+                stepsEl.textContent = state.steps;
+                distanceEl.textContent = state.distance.toFixed(2);
+                caloriesEl.textContent = state.calories.toFixed(0);
+                hydrationEl.textContent = state.hydration;
+                heartRateEl.textContent = state.heartRate > 0 ? state.heartRate : '--';
+                uvIndexEl.textContent = state.uvIndex > 0 ? state.uvIndex : '--';
+                runningTimeEl.textContent = formatTime(state.runningTimeInSeconds);
+            }
+
+            /**
+             * Incrementa o tempo de corrida a cada segundo.
+             */
+            function trackRunningTime() {
+                state.runningTimeInSeconds++;
+                updateUI();
+            }
+
+            /**
+             * Simula o monitoramento de batimentos cardíacos.
+             */
+            function monitorHeartRate() {
+                // A taxa de batimentos agora é influenciada pelo movimento (distância)
+                const minBPM = state.distance > 0 ? 90 : 60;
+                const maxBPM = state.distance > 0 ? 120 : 80;
+                state.heartRate = Math.floor(Math.random() * (maxBPM - minBPM + 1)) + minBPM;
+                updateUI();
+                
+                if (state.heartRate > 150) {
+                    showAlert(`Atenção! Seus batimentos cardíacos estão em ${state.heartRate} bpm. Por favor, descanse um pouco.`, 'warning');
+                }
+            }
+
+            /**
+             * Verifica a exposição ao sol (simulado).
+             */
+            function checkSunExposure() {
+                state.uvIndex = Math.floor(Math.random() * 11);
+                updateUI();
+                
+                if (state.uvIndex > 7) {
+                    showAlert(`Cuidado! O índice UV está alto (${state.uvIndex}). Use protetor solar e evite exposição prolongada.`, 'warning');
+                }
+            }
+            
+            /**
+             * Define um alerta de hidratação a cada 30 minutos (simulado).
+             */
+            function setHydrationAlert() {
+                showAlert("Lembre-se de beber um copo de água!", 'warning');
+                state.lastHydrationAlert = new Date();
+            }
+
+            /**
+             * Adiciona ou atualiza os dados do dia atual no histórico semanal.
+             */
+            function updateWeeklyHistory() {
+                const today = new Date().toLocaleDateString('pt-BR');
+                const historyIndex = state.weeklyHistory.findIndex(day => day.date === today);
+
+                if (historyIndex > -1) {
+                    // Atualiza o dia existente
+                    state.weeklyHistory[historyIndex].steps = state.steps;
+                    state.weeklyHistory[historyIndex].calories = state.calories;
+                } else {
+                    // Adiciona um novo dia se não existir
+                    state.weeklyHistory.push({
+                        date: today,
+                        steps: state.steps,
+                        calories: state.calories,
+                    });
+                }
+                
+                // Mantém apenas os últimos 7 dias
+                if (state.weeklyHistory.length > 7) {
+                    state.weeklyHistory.shift();
+                }
+            }
+
+            /**
+             * Renderiza o histórico semanal na interface.
+             */
+            function renderWeeklyHistory() {
+                weeklyHistoryEl.innerHTML = '';
+                state.weeklyHistory.forEach(day => {
+                    const weekday = new Date(day.date).toLocaleDateString('pt-BR', { weekday: 'short' });
+                    // Capitaliza a primeira letra do nome do dia
+                    const formattedWeekday = weekday.charAt(0).toUpperCase() + weekday.slice(1) + '.';
+                    
+                    const dayEl = document.createElement('div');
+                    dayEl.className = 'bg-white p-4 rounded-xl shadow-md';
+                    dayEl.innerHTML = `
+                        <p class="text-lg font-bold text-gray-800">${formattedWeekday}</p>
+                        <p class="text-sm text-gray-500">Passos: ${day.steps}</p>
+                        <p class="text-sm font-semibold text-red-500">Calorias: ${day.calories.toFixed(0)}</p>
+                    `;
+                    weeklyHistoryEl.appendChild(dayEl);
+                });
+            }
+
+            /**
+             * Converte um arquivo de imagem para uma string Base64.
+             * @param {File} file - O arquivo de imagem a ser convertido.
+             * @returns {Promise<string>} Uma promessa que resolve com a string Base64.
+             */
+            function imageToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
+                    reader.onerror = error => reject(error);
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            /**
+             * Chama a API Gemini para analisar a imagem.
+             * @param {string} base64Data - A imagem em formato Base64.
+             * @returns {Promise<object>} A promessa que resolve com o resultado da análise.
+             */
+            async function analyzeImageWithAI(base64Data) {
+                const prompt = "Analise esta imagem de um corpo humano. Avalie a evolução visível, como perda de gordura, definição muscular ou ganho de massa. Seja sincero. Se a pessoa parece ter ganho peso de forma não saudável, sugira um plano simples de alimentação e exercícios. A resposta deve ser um objeto JSON com as chaves 'analise' (string, com a avaliação e sugestões), 'progresso' (string, ex: 'melhora visível', 'estável', 'ganho de peso'), e 'sucesso' (booleano).";
+                
+                let chatHistory = [];
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: prompt },
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64Data
+                                }
+                            }
+                        ]
+                    }],
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "analise": { "type": "STRING" },
+                                "progresso": { "type": "STRING" },
+                                "sucesso": { "type": "BOOLEAN" }
+                            },
+                        }
+                    }
+                };
+
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                let retryDelay = 1000;
+                const maxRetries = 5;
+
+                for (let i = 0; i < maxRetries; i++) {
+                    try {
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.status === 429) {
+                            await new Promise(resolve => setTimeout(resolve, retryDelay));
+                            retryDelay *= 2;
+                            continue;
+                        }
+
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const json = result.candidates[0].content.parts[0].text;
+                            return JSON.parse(json);
+                        } else {
+                            throw new Error('Resposta da API incompleta.');
+                        }
+                    } catch (error) {
+                        if (i === maxRetries - 1) {
+                            throw error;
+                        }
+                    }
+                }
+            }
+
+            // =======================================================================================
+            // 3. Funções de Controle (Início, Pausa, Parada, Eventos)
+            // =======================================================================================
+            
+            /**
+             * Alterna a visibilidade dos módulos.
+             * @param {string} moduleToShow - ID do módulo a ser exibido.
+             */
+            function showModule(moduleToShow) {
+                const modules = [mainMenu, metricsModule, planModule, historyModule];
+                modules.forEach(module => {
+                    if (module.id === moduleToShow) {
+                        module.classList.remove('hidden');
+                    } else {
+                        module.classList.add('hidden');
+                    }
+                });
+            }
+
+            /**
+             * Inicia todos os rastreadores.
+             */
+            function startAllTrackers() {
+                startGeolocationTracking();
+                runningTimeInterval = setInterval(trackRunningTime, 1000);
+                heartRateInterval = setInterval(monitorHeartRate, 3000);
+                uvCheckInterval = setInterval(checkSunExposure, 10000);
+                hydrationAlertInterval = setInterval(setHydrationAlert, 1000 * 60 * 30);
+            }
+
+            /**
+             * Para todos os rastreadores.
+             */
+            function stopAllTrackers() {
+                stopGeolocationTracking();
+                clearInterval(runningTimeInterval);
+                clearInterval(heartRateInterval);
+                clearInterval(uvCheckInterval);
+                clearInterval(hydrationAlertInterval);
+            }
+
+            /**
+             * Reseta todo o estado do aplicativo.
+             */
+            function resetApp() {
+                stopAllTrackers();
+                state.steps = 0;
+                state.distance = 0;
+                state.calories = 0;
+                state.hydration = 0;
+                state.heartRate = 0;
+                state.uvIndex = 0;
+                state.runningTimeInSeconds = 0;
+                state.isTracking = false;
+                state.isPaused = false;
+                state.weeklyHistory = [];
+                updateUI();
+                renderWeeklyHistory();
+                imagePreview.classList.add('hidden');
+                analysisResults.classList.add('hidden');
+                imageInput.value = '';
+                // Reseta as metas
+                goalsListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+
+            /**
+             * Adiciona um copo de água e atualiza a interface.
+             */
+            function drinkWater() {
+                state.hydration++;
+                updateUI();
+                showAlert(`Você bebeu ${state.hydration} copos de água hoje!`, 'success');
+            }
+
+            /**
+             * Alterna entre iniciar e pausar/continuar o rastreamento.
+             */
+            function toggleTracking() {
+                if (state.isTracking) {
+                    if (state.isPaused) {
+                        state.isPaused = false;
+                        startButton.textContent = "Pausar";
+                        startButton.classList.remove('bg-yellow-500');
+                        startButton.classList.add('bg-indigo-600');
+                        startAllTrackers();
+                        showAlert("Rastreamento continuado.", 'success');
+                    } else {
+                        state.isPaused = true;
+                        startButton.textContent = "Continuar";
+                        startButton.classList.remove('bg-indigo-600');
+                        startButton.classList.add('bg-yellow-500');
+                        stopAllTrackers();
+                        showAlert("Rastreamento pausado.", 'warning');
+                    }
+                } else {
+                    state.isTracking = true;
+                    startButton.textContent = "Pausar";
+                    startButton.classList.add('bg-indigo-600');
+                    startButton.classList.remove('bg-red-500');
+                    stopButton.classList.remove('hidden');
+                    startAllTrackers();
+                }
+            }
+
+            /**
+             * Para o rastreamento e reseta o aplicativo.
+             */
+            function stopTracking() {
+                resetApp();
+                startButton.textContent = "Começar";
+                startButton.classList.remove('bg-indigo-600', 'bg-yellow-500');
+                startButton.classList.add('bg-indigo-600');
+                stopButton.classList.add('hidden');
+                showAlert("Rastreamento parado. Dados resetados.", 'warning');
+            }
+
+            /**
+             * Lida com o evento de análise de imagem.
+             */
+            async function handleImageAnalysis() {
+                const file = imageInput.files[0];
+                if (!file) {
+                    showAlert('Por favor, selecione uma imagem para análise.', 'warning');
+                    return;
+                }
+
+                // Exibe a imagem e a área de resultados
+                uploadedImage.src = URL.createObjectURL(file);
+                imagePreview.classList.remove('hidden');
+                analysisResults.classList.remove('hidden');
+                analysisLoading.classList.remove('hidden');
+                analysisContent.innerHTML = '';
+                analyzeButton.disabled = true;
+
+                try {
+                    const base64Data = await imageToBase64(file);
+                    const analysis = await analyzeImageWithAI(base64Data);
+                    
+                    analysisLoading.classList.add('hidden');
+                    if (analysis.sucesso) {
+                        analysisContent.innerHTML = `
+                            <p class="text-xl font-bold text-gray-800">Análise Completa</p>
+                            <p class="mt-2 text-gray-700">${analysis.analise}</p>
+                            <p class="mt-4 text-lg font-semibold">Progresso: <span class="${analysis.progresso === 'melhora visível' ? 'text-green-600' : 'text-yellow-600'}">${analysis.progresso}</span></p>
+                        `;
+                    } else {
+                         analysisContent.innerHTML = `
+                            <p class="text-xl font-bold text-red-600">Erro na Análise</p>
+                            <p class="mt-2 text-red-500">${analysis.analise}</p>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Erro ao analisar a imagem:', error);
+                    analysisLoading.classList.add('hidden');
+                    analysisContent.innerHTML = `
+                        <p class="text-xl font-bold text-red-600">Erro na Análise</p>
+                        <p class="mt-2 text-red-500">Ocorreu um erro ao processar sua imagem. Por favor, tente novamente.</p>
+                    `;
+                } finally {
+                    analyzeButton.disabled = false;
+                }
+            }
+
+            // =======================================================================================
+            // 4. Listeners de Eventos
+            // =======================================================================================
+            
+            // Listener para o botão "Iniciar" da tela de splash
+            accessAppButton.addEventListener('click', () => {
+                splashScreen.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                showModule('mainMenu');
+            });
+
+            // Listeners para os botões do menu principal
+            document.getElementById('goToMetrics').addEventListener('click', () => {
+                showModule('metricsModule');
+                updateUI(); // Garante que a UI seja atualizada ao entrar no módulo
+            });
+            document.getElementById('goToPlan').addEventListener('click', () => {
+                showModule('planModule');
+            });
+            document.getElementById('goToHistory').addEventListener('click', () => {
+                showModule('historyModule');
+                renderWeeklyHistory(); // Renderiza o histórico ao entrar no módulo
+            });
+
+            // Listeners para os botões de "Voltar" de cada módulo
+            document.getElementById('backFromMetrics').addEventListener('click', () => {
+                showModule('mainMenu');
+            });
+            document.getElementById('backFromPlan').addEventListener('click', () => {
+                showModule('mainMenu');
+            });
+            document.getElementById('backFromHistory').addEventListener('click', () => {
+                showModule('mainMenu');
+            });
+
+            // Listeners de funcionalidade
+            startButton.addEventListener('click', toggleTracking);
+            stopButton.addEventListener('click', stopTracking);
+            drinkButton.addEventListener('click', drinkWater);
+            analyzeButton.addEventListener('click', handleImageAnalysis);
+
+            // Listeners para os checkboxes de metas
+            goalsListEl.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const goalId = e.target.id.split('-')[1];
+                    state.goals[goalId] = e.target.checked;
+                    showAlert(`Meta de ${e.target.labels[0].textContent} ${e.target.checked ? 'concluída' : 'revertida'}!`, 'success');
+                });
+            });
+            
+            // Inicializa a UI
+            updateUI();
+        };
+    </script>
+</body>
+</html>
